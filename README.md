@@ -16,11 +16,11 @@ And for kanji:
 - Hangul
 - Definition
 
-CSS stack:
+CSS stack (you need to install all the fonts from the /font/ folder as system fonts):
 - Windows system fonts
-- Aegyptus + UnicodiaSesh
+- Specific fonts found online
 - Google Noto fonts
-- Unifont
+- GNU Unifont
 
 > https://xem.github.io/UnicodeSlideshow/data/index.html (tables)
 
