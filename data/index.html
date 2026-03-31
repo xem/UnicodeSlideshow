@@ -1,0 +1,223 @@
+<!doctype html>
+<link rel=stylesheet href="../fonts.css">
+<h1>Unicode 17.0</h1>
+<div id=b>Loading...</div>
+<script>
+
+blocks = "", emoji = "", unicode = "", unihan = "";
+blocksarray = [], emojiarray = [], unicodearray = [], unihanarray = [];
+
+// windows-1252 aliases for U+80..U+9F
+windows = `EURO SIGN
+
+SINGLE LOW-9 QUOTATION MARK
+LATIN SMALL LETTER F WITH HOOK
+DOUBLE LOW-9 QUOTATION MARK
+HORIZONTAL ELLIPSIS
+DAGGER
+DOUBLE DAGGER
+MODIFIER LETTER CIRCUMFLEX ACCENT
+PER MILLE SIGN
+LATIN CAPITAL LETTER S WITH CARON
+SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+LATIN CAPITAL LIGATURE OE
+
+LATIN CAPITAL LETTER Z WITH CARON
+
+
+LEFT SINGLE QUOTATION MARK
+RIGHT SINGLE QUOTATION MARK
+LEFT DOUBLE QUOTATION MARK
+RIGHT DOUBLE QUOTATION MARK
+BULLET
+EN DASH
+EM DASH
+SMALL TILDE
+TRADE MARK SIGN
+LATIN SMALL LETTER S WITH CARON
+SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+LATIN SMALL LIGATURE OE
+
+LATIN SMALL LETTER Z WITH CARON
+LATIN CAPITAL LETTER Y WITH DIAERESIS`.split("\n");
+
+
+async function loadAll() {
+  [blocks, emoji, unicode, unihan] =
+    await Promise.all([
+      fetch("Blocks.txt").then(r => r.text()),
+      fetch("emoji-test.txt").then(r => r.text()),
+      fetch("UnicodeData.txt").then(r => r.text()),
+      fetch("Unihan_Readings.txt").then(r => r.text())
+    ]);
+
+  parse();
+}
+
+parse = () => {
+
+  // blocks
+  blocks = blocks.split("\n");
+  for(i in blocks){
+    if(blocks[i].length > 0 && !blocks[i].startsWith("#")){
+      blocks[i].replace(/(.*?)\.\.(.*?); (.*)/g, (a,b,c,d)=>blocksarray.push(["0x"+b,"0x"+c,d]));
+    }
+  }
+  console.log(blocksarray);
+  
+  // emoji
+  subgroup = "";
+  emoji = emoji.split("\n");
+  for(i in emoji){
+    if(emoji[i].startsWith("# subgroup: ")){
+      emoji[i].replace(/# subgroup: (.*)/, (a,b)=>subgroup=b);
+    }
+    else if(emoji[i].length > 0 && !emoji[i].startsWith("#")){
+      emoji[i].replace(/(.*?) +;.*?E.*?\..*? (.*)/g, (a,b,c)=>emojiarray.push(["0x"+b.replaceAll(" ", " 0x"), subgroup, c]));
+    }
+  }
+  console.log(emojiarray);
+  
+  // unicode
+  unicode = unicode.split("\n");
+  for(i in unicode){
+    if(unicode[i].length > 0 && !unicode[i].startsWith("#")){
+      unicode[i].replace(/(.*?);(.*?);.*?;.*?;.*?;.*?;.*?;.*?;.*?;.*?;(.*?);.*/g, (a,b,c,d)=>unicodearray.push(["0x"+b.replaceAll(" ", " 0x"), c, d]));
+      // 0000;<control>;Cc;0;BN;;;;;N;NULL;;;;
+    }
+  }
+  console.log(unicodearray);
+  
+  // unihan (mandarin, japanese, vietnamese, hangul, definition)
+  unihan = unihan.split("\n");
+  unihanobject = {};
+  for(i in unihan){
+    
+    // mandarin
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kMandarin")){
+      unihan[i].replace(/U\+(.*?)\skMandarin\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].mandarin = c;
+      });
+    }
+    
+    // japanese
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kJapanese")){
+      unihan[i].replace(/U\+(.*?)\skJapanese\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].japanese = c;
+      });
+    }
+
+    // vietnamese
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kVietnamese")){
+      unihan[i].replace(/U\+(.*?)\skVietnamese\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].vietnamese = c;
+      });
+    }
+    
+    // hangul
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kHangul")){
+      unihan[i].replace(/U\+(.*?)\skHangul\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].hangul = c;
+      });
+    }
+    
+    // definition
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kDefinition")){
+      unihan[i].replace(/U\+(.*?)\skDefinition\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].definition = c;
+      });
+    }
+    
+    // definition
+    if(unihan[i].length > 0 && !unihan[i].startsWith("#") && unihan[i].includes("kDefinition")){
+      unihan[i].replace(/U\+(.*?)\skDefinition\s(.*)/g, (a,b,c)=>{
+        if(!unihanobject[b]){ unihanobject[b] = {} };
+        unihanobject[b].definition = c;
+      });
+    }
+  }
+  
+  render();
+}
+
+render = () => {
+  
+  b.innerHTML = "<h2>Blocks</h2>";
+  
+  // Summary
+  for(i in blocksarray){
+    b.insertAdjacentHTML("beforeEnd", "<a href='#" + blocksarray[i][0] + "'>" + blocksarray[i][0].replace("0x","U+") + ".." +blocksarray[i][1].replace("0x","U+") + ": " + blocksarray[i][2] + "<br>");
+  }
+  b.insertAdjacentHTML("beforeEnd", "<a href='#emoji'>U+1FXXX..U+1FXXX: Emoji sequences</a><br>");
+  
+  // Blocks
+  setTimeout(drawNextBlock, 16);
+}
+
+currentblock = 0;
+drawNextBlock = () => {
+  
+  if(!blocksarray[currentblock] || !blocksarray[currentblock][0]) return;
+  
+  // Title
+  html = "<h2 id='" + blocksarray[currentblock][0] + "'>" + blocksarray[currentblock][0].replace("0x","U+") + ".." +blocksarray[currentblock][1].replace("0x","U+") + ": " + blocksarray[currentblock][2] + "</h2><table><tr><th>Glyph<th>Code point<th>Canonical name<th>Alias name";
+  
+  // Han
+  if(
+    (+blocksarray[currentblock][0] >= 0x3400 && +blocksarray[currentblock][0] <= 0x9FFF)
+    || (+blocksarray[currentblock][0] >= 0xF900 && +blocksarray[currentblock][0] <= 0xFA2F)
+    || (+blocksarray[currentblock][0] >= 0x20000 && +blocksarray[currentblock][0] <= 0x32389)
+  ){
+    html += "<th>Mandarin<th>Japanese<th>Vietnamee<th>Hangul<th>Definition";
+  }
+  
+  // assigned chars
+  for(j in unicodearray){
+    if(+unicodearray[j][0] >= +blocksarray[currentblock][0] && +unicodearray[j][0] <= +blocksarray[currentblock][1]){
+      html += 
+        "<tr><td class=glyph>" 
+        + unicodearray[j][0].replace("0x","&#x") 
+        + ";<td>"
+        + unicodearray[j][0].replace("0x","U+") 
+        + "<td>" 
+        + unicodearray[j][1].replace("<","&lt;") 
+        + "<td>" 
+        + (+unicodearray[j][0] >= 0x80 && +unicodearray[j][0] <= 0x9F ? (windows[+unicodearray[j][0] - 0x80] ? "WINDOWS-1252: " + windows[+unicodearray[j][0] - 0x80] : "") : unicodearray[j][2]);
+
+      // Han
+      if(
+        ((+unicodearray[j][0] >= 0x3400 && +unicodearray[j][0] <= 0x9FFF)
+        || (+unicodearray[j][0] >= 0xF900 && +unicodearray[j][0] <= 0xFA2F)
+        || (+unicodearray[j][0] >= 0x20000 && +unicodearray[j][0] <= 0x32389))
+        && unihanobject[unicodearray[j][0].replace("0x","")]
+      ){
+        html += "<td>" + (unihanobject[unicodearray[j][0].replace("0x","")].mandarin || "")
+        + "<td>" + (unihanobject[unicodearray[j][0].replace("0x","")].japanese || "")
+        + "<td>" + (unihanobject[unicodearray[j][0].replace("0x","")].vietnamese || "")
+        + "<td>" + (unihanobject[unicodearray[j][0].replace("0x","")].hangul || "")
+        + "<td>" + (unihanobject[unicodearray[j][0].replace("0x","")].definition || "");
+      }
+    }
+  }
+  
+  html += "</table>";
+  b.insertAdjacentHTML("beforeEnd", html);
+  
+  currentblock++;
+  setTimeout(drawNextBlock, 16);
+}
+
+window.onload = loadAll;
+</script>
+
+<style>
+body { font-family: monospace, sans-serif; -moz-control-character-visibility: visible; }
+a { text-decoration: none }
+table { border-collapse: collapse; }
+th, td { border: 1px solid; padding: 1px 5px; min-height: 40px; line-height: 40px; }
+.glyph { min-width: 100px; text-align: center; font-size: 30px; line-height: 40px; }

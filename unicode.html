@@ -1,0 +1,33 @@
+﻿<!doctype html>
+<link rel=stylesheet href=fonts.css>
+<body id=u>
+<script>
+
+// Loop
+c = 0; // char index
+
+
+setInterval(() => {
+  
+  // body background
+  u.style="-moz-control-character-visibility:visible;font:4vh arial;color:#fff;background:hsl("+(c/9+200)+",50%,50%)";
+  
+  C = names[c][1]; // name
+  
+  cp = names[c][0]; // code point
+  
+  // current block name
+  for(i in blocks){
+    if(cp >= blocks[i][0] && cp <= blocks[i][1]){
+      B = blocks[i][2];
+      break;
+    }
+  }
+  
+  // body content
+  u.innerHTML='<center><div style="font:40vh/80vh arial;height:80vh">&#'+cp+"</div><b><div id=char>U+"+(1E9+cp.toString(16).toUpperCase()).slice((65536>c)-5)+"<br>"+B+"<br>"+C;
+  
+  c++;
+}, 100)
+
+</script>
