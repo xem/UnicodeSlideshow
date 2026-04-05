@@ -2,12 +2,14 @@ UnicodeSlideshow
 ===
 
 Demos:
+- https://xem.github.io/UnicodeSlideshow/unicode.html (unicode + emoji slideshow)
+
+Data:
 - https://xem.github.io/UnicodeSlideshow/data/index.html (full tables)
-- https://xem.github.io/UnicodeSlideshow/data/chars.html (just the glyphs)
-- https://xem.github.io/UnicodeSlideshow/data/csv.html (full csv)
-- https://xem.github.io/UnicodeSlideshow/unicode.html (unicode slideshow)
-- https://xem.github.io/UnicodeSlideshow/emoji.html (emoji + ZWJ slideshow)
-- https://xem.github.io/UnicodeSlideshow/full.html (full slideshow)
+- https://xem.github.io/UnicodeSlideshow/data/chars.html (just the glyphs, js script)
+- https://xem.github.io/UnicodeSlideshow/data/chars.static.html (just the glyphs, static)
+- https://xem.github.io/UnicodeSlideshow/data/tsv.html (full tsv, js script)
+- https://xem.github.io/UnicodeSlideshow/data/tsv.tsv (full tsv, static)
 
 Current version:
 - Unicode 17.0
